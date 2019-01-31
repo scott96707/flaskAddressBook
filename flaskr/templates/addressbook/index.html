@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block entryname %}Posts{% endblock %}</h1>
+    {% if g.user %}
+        <a class="action" href="{{ url_for('addressbook.create') }}">New</a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% for post in posts %}
+    <article class="post">
+        <header>
+        <div>
+            <h1>{{ post['entryname'] }}</h1>
+            <p>{{ post['entryaddress'] }},
+            {{ post['entrycity'] }},
+            {{ post['entrystate'] }}</p>
+        </div>
+        {% if g.user['id'] == post['author_id'] %}
+            <a class="action" href="{{ url_for('addressbook.update', id=post['id']) }}">Edit</a>
+        {% endif %}
+        </header>
+    </article>
+    {% if not loop.last %}
+        <hr>
+    {% endif %}
+    {% endfor %}
+{% endblock %}
