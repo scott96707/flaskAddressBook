@@ -4,10 +4,11 @@ pip install -e .
 flask init-db
 flask run
 
-
-Deploy production:
+Setup distribution file:
 pip install wheel
 python setup.py bdist_wheel
+
+Deploy production:
 pip install flaskr-1.0.0-py3-none-any.whl
 export FLASK_APP=flaskr
 flask init-db
