@@ -8,7 +8,7 @@ document.getElementById("zipBtn").addEventListener("click", function() {
     let state = e.options[e.selectedIndex].value;
 
     let theUrl = `http://production.shippingapis.com/ShippingAPI.dll?API=ZipCodeLookup&XML=` +
-    `<ZipCodeLookupRequest%20USERID=${apiKey}><Address><Address1></Address1>` +
+    `<ZipCodeLookupRequest%20USERID="829SGCOM5266"><Address><Address1></Address1>` +
     `<Address2>${address}</Address2>` +
     `<City>${city}</City><State>${state}</State>` +
     `</Address></ZipCodeLookupRequest>`;
@@ -41,7 +41,7 @@ document.getElementById("fixBtn").addEventListener("click", function() {
     let zipCode = document.getElementById("entryzip").value;
 
     let theUrl = `http://production.shippingapis.com/ShippingAPITest.dll?API=` +
-    `CityStateLookup&XML=<CityStateLookupRequest USERID=${apiKey}>` +
+    `CityStateLookup&XML=<CityStateLookupRequest USERID="829SGCOM5266">` +
     `<ZipCode ID="0"><Zip5>${zipCode}</Zip5></ZipCode></CityStateLookupRequest>`;
 
         let xhr = new XMLHttpRequest();

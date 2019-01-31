@@ -1,6 +1,8 @@
 #To setup dev environment:
-pip install -e .
+python3 -m venv venv
 . venv/bin/activate
+pip install -e .
+pip install python-dotenv
 flask init-db
 flask run
 
