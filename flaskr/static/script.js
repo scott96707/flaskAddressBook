@@ -1,69 +1,40 @@
-const apiKey = "829SGCOM5266";
-
-document.getElementById("zipBtn").addEventListener("click", function() {
-        
-    let address = document.getElementById("entryaddress").value;
-    let city = document.getElementById("entrycity").value;
-    let e = document.getElementById("entrystate");
-    let state = e.options[e.selectedIndex].value;
-
-    let theUrl = `http://production.shippingapis.com/ShippingAPI.dll?API=ZipCodeLookup&XML=` +
-    `<ZipCodeLookupRequest%20USERID="829SGCOM5266"><Address><Address1></Address1>` +
-    `<Address2>${address}</Address2>` +
-    `<City>${city}</City><State>${state}</State>` +
-    `</Address></ZipCodeLookupRequest>`;
-
-        let xhr = new XMLHttpRequest();
-        xhr.open("GET", theUrl, true);
-        xhr.send();
-
-        xhr.addEventListener("readystatechange", processRequest, false);
-        
-        function processRequest(e) {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                let response = xhr.responseText;
-                parser = new DOMParser();
-                xmlDoc = parser.parseFromString(response, "text/xml");
-                
-                try {
-                    let zip5 = xmlDoc.getElementsByTagName("Zip5")[0].childNodes[0].nodeValue;
-                    let zip4 = xmlDoc.getElementsByTagName("Zip4")[0].childNodes[0].nodeValue;
-                    document.getElementById("entryzip").value = `${zip5} - ${zip4}`;
-                } catch (err) {
-                    alert('Check your address/city/state');
-                }
-            }
-        }
-});
-
-document.getElementById("fixBtn").addEventListener("click", function() {
+const getZip = () => {
     
-    let zipCode = document.getElementById("entryzip").value;
+    const zipCode = document.getElementById("entryzip").value;
+    
+    fetch('/zipcheck', {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ zip: zipCode })
+    })
+    .then(res =>{ return res.json() })
+    .then(myJson => { 
+        document.getElementById("entrycity").value = myJson.city
+        document.getElementById("entrystate").value = myJson.state;
+    })
+    .catch(err => alert("Make sure your zip code is corrrect"))
+};
 
-    let theUrl = `http://production.shippingapis.com/ShippingAPITest.dll?API=` +
-    `CityStateLookup&XML=<CityStateLookupRequest USERID="829SGCOM5266">` +
-    `<ZipCode ID="0"><Zip5>${zipCode}</Zip5></ZipCode></CityStateLookupRequest>`;
+const getAddress = () => {
+    
+    const address = document.getElementById("entryaddress").value;
+    const city = document.getElementById("entrycity").value;
+    const e = document.getElementById("entrystate");
+    const state = e.options[e.selectedIndex].value;
 
-        let xhr = new XMLHttpRequest();
-        xhr.open("GET", theUrl, true);
-        xhr.send();
+    fetch('/addresscheck', {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            city: city, state: state, address: address
+        })
+    })
+    .then(res =>{ return res.json() })
+    .then(ret => { 
+        document.getElementById("entryzip").value = ret.output
+    })
+    .catch(err => alert("Make sure your Address, City, and State are correct"))
+};
 
-        xhr.addEventListener("readystatechange", processRequest, false);
-        
-        function processRequest(e) {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                let response = xhr.responseText;
-                parser = new DOMParser();
-                xmlDoc = parser.parseFromString(response, "text/xml");
-                
-                try {
-                    let city = xmlDoc.getElementsByTagName("City")[0].childNodes[0].nodeValue;
-                    let state = xmlDoc.getElementsByTagName("State")[0].childNodes[0].nodeValue;
-                    document.getElementById("entrycity").value = city;
-                    document.getElementById("entrystate").value = state;
-                } catch (err) {
-                    alert('Invalid zip code');
-                }
-            }
-        }
-});
+document.getElementById("fixBtn").addEventListener("click", getZip)
+document.getElementById("zipBtn").addEventListener("click", getAddress)

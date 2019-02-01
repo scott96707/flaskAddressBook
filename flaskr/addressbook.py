@@ -11,8 +11,8 @@ import requests
 import xml.etree.ElementTree as ET
 import json
 
-
 bp = Blueprint('addressbook', __name__)
+USERID="829SGCOM5266"
 
 @bp.route('/')
 def index():
@@ -28,8 +28,6 @@ def index():
 @bp.route('/zipcheck', methods=['POST'])
 @login_required
 def zipcheck():
-
-    USERID="829SGCOM5266"
 
     data = request.get_json()
     zipNum = data.get("zip")
@@ -55,8 +53,6 @@ def zipcheck():
 @bp.route('/addresscheck', methods=['POST'])
 @login_required
 def addresscheck():
-
-    USERID="829SGCOM5266"
 
     data = request.get_json()
     address = data.get("address")
