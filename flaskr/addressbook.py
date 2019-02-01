@@ -2,10 +2,15 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for
 )
 from werkzeug.exceptions import abort
-from flask import current_app
+from flask import current_app, jsonify
 
 from flaskr.auth import login_required
 from flaskr.db import get_db
+
+import requests
+import xml.etree.ElementTree as ET
+import json
+
 
 bp = Blueprint('addressbook', __name__)
 
@@ -17,7 +22,62 @@ def index():
         ' FROM post p JOIN user u ON p.author_id = u.id'
         ' ORDER BY created DESC'
     ).fetchall()
+
     return render_template('addressbook/index.html', posts=posts)
+
+@bp.route('/zipcheck', methods=['POST'])
+@login_required
+def zipcheck():
+
+    USERID="829SGCOM5266"
+
+    data = request.get_json()
+    zipNum = data.get("zip")
+
+    addressurl = '''http://production.shippingapis.com/ShippingAPITest.dll?API=CityStateLookup
+        &XML=<CityStateLookupRequest USERID="''' + USERID + '''"><ZipCode ID="5">
+        <Zip5>''' + zipNum + '''</Zip5></ZipCode></CityStateLookupRequest>'''
+
+    try:
+        res = requests.get(addressurl)
+    except Exception as exc:
+        res = exc
+
+    root = ET.fromstring(res.text)
+    outputCity = root[0][1].text
+    outputState = root[0][2].text
+    output = {
+        'city': outputCity, 
+        'state': outputState
+        }
+    return json.dumps(output)
+
+@bp.route('/addresscheck', methods=['POST'])
+@login_required
+def addresscheck():
+
+    USERID="829SGCOM5266"
+
+    data = request.get_json()
+    address = data.get("address")
+    city = data.get("city")
+    state = data.get("state")
+
+    zipUrl = '''http://production.shippingapis.com/ShippingAPITest.dll?API=ZipCodeLookup
+        &XML=<ZipCodeLookupRequest USERID="''' + USERID +'''"><Address ID="0">
+        <Address1></Address1><Address2>''' + address + '''</Address2>
+        <City>''' + city + '''</City><State>''' + state + '''</State></Address>
+        </ZipCodeLookupRequest>'''
+
+    try:
+        res = requests.get(zipUrl)
+    except Exception as exc:
+        res = exc
+
+    root = ET.fromstring(res.text)
+    output = root[0][3].text + ' - ' + root[0][4].text
+
+    return jsonify(output=output)
 
 @bp.route('/create', methods=('GET', 'POST'))
 @login_required
